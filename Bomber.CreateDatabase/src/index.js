@@ -19,10 +19,7 @@ exports.handler = async (event, context) => {
     
     // Tweak the schema as desired
     createTableInput.ProvisionedThroughput.ReadCapacityUnits = 2;
-    
-    console.log('Creating table with schema:');
-    console.dir(createTableInput, { depth: null });
-    
+
     // Create the table
     ddb.createTable(createTableInput).promise()
         // Wait for it to become ready

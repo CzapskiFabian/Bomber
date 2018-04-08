@@ -39,6 +39,34 @@
               }]
             }
           },
+          "BomberPutItemRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [{ "Effect": "Allow", "Principal": {"Service": ["lambda.amazonaws.com"]}, "Action": ["sts:AssumeRole"] }]
+              },
+              "Path": "/",
+              "Policies": [{
+                "PolicyName": "root",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+                      "Resource": "arn:aws:logs:*:*:*"
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": ["dynamodb:PutItem"],
+                      "Resource": "arn:aws:dynamodb:*:*:table/TestTable"
+                    }
+                  ]
+                }
+              }]
+            }
+          },
         "BomberCreateDatabaseLambda": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -61,6 +89,36 @@
                 "Role": {
                     "Fn::GetAtt": [
                         "BomberCreateDatabaseRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs6.10",
+                "MemorySize": 128,
+                "Timeout": 300
+            }
+        },
+        "BomberPutItemLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "exports.handler = () => {}"
+                },
+                "Description": "Inserts an item into dynamodb",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "bomber-put-item-",
+                            {
+                                "Ref": "Environment"
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "BomberPutItemRole",
                         "Arn"
                     ]
                 },

@@ -7,6 +7,14 @@ chai.use(sinonChai);
 
 describe('index', () => {
     it('should do something', () => {
-        index.handler({}, {});
+        var event = {
+            "username":"fabian",
+            "coordinates":{
+                "latitude":51.509865,
+                "longitude":-0.118092
+            },
+            "content": "testContent"
+          };
+        index.handler(event, {});
       });
 });

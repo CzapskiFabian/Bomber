@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 import config from './config/config';
+import uuid from 'uuid';
 const ddbGeo = require('dynamodb-geo');
 
 AWS.config.update({ region: 'eu-central-1' });
@@ -10,23 +11,25 @@ exports.handler = async (event, context) => {
     const ddbGeoConfig = new ddbGeo.GeoDataManagerConfiguration(ddb, config.tableName);
     ddbGeoConfig.longitudeFirst = true; 
     const myGeoTableManager = new ddbGeo.GeoDataManager(ddbGeoConfig);
-
-    // Pick a hashKeyLength appropriate to your usage
-    ddbGeoConfig.hashKeyLength = 3;
     
-    // Use GeoTableUtil to help construct a CreateTableInput.
-    const createTableInput = ddbGeo.GeoTableUtil.getCreateTableRequest(ddbGeoConfig);
-    
-    // Tweak the schema as desired
-    createTableInput.ProvisionedThroughput.ReadCapacityUnits = 2;
-    
-    console.log('Creating table with schema:');
-    console.dir(createTableInput, { depth: null });
-    
-    // Create the table
-    ddb.createTable(createTableInput).promise()
-        // Wait for it to become ready
-        .then(function () { console.log("created"); return ddb.waitFor('tableExists', { TableName: ddbGeoConfig.tableName }).promise() })
-        .then(function () { console.log('Table created and ready!') });
+    myGeoTableManager.putPoint({
+        RangeKeyValue: { S: uuid.v1() },
+        GeoPoint: { 
+            latitude: event.coordinates.latitude,
+            longitude: event.coordinates.longitude
+        },
+        PutItemInput: {
+            Item: {
+                username: { S: event.username }, 
+                content: { S: event.content }
+            }
+        }
+    }).promise()
+    .then(function() { 
+        context.succeed({
+			statusCode: '200',
+			headers: { 'Content-Type': 'application/json'}
+		});
+     });
 };
   
