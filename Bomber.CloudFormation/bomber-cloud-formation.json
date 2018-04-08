@@ -1,0 +1,75 @@
+{
+    "Description": "Cloud formation template for bomber resources",
+    "Parameters": {
+        "Environment": {
+            "Type": "String",
+            "AllowedValues": [
+                "dev",
+                "preprod"
+            ],
+            "Description": "Choose the name of the environment."
+        }
+    },
+    "Resources": {
+        "BomberCreateDatabaseRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+              "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17",
+                "Statement": [{ "Effect": "Allow", "Principal": {"Service": ["lambda.amazonaws.com"]}, "Action": ["sts:AssumeRole"] }]
+              },
+              "Path": "/",
+              "Policies": [{
+                "PolicyName": "root",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+                      "Resource": "arn:aws:logs:*:*:*"
+                    },
+                    {
+                      "Effect": "Allow",
+                      "Action": ["dynamodb:CreateTable"],
+                      "Resource": "arn:aws:dynamodb:*:*:*"
+                    }
+                  ]
+                }
+              }]
+            }
+          },
+        "BomberCreateDatabaseLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "exports.handler = () => {}"
+                },
+                "Description": "Creates a table optimised for geolocation operations",
+                "FunctionName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "bomber-create-database-",
+                            {
+                                "Ref": "Environment"
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "BomberCreateDatabaseRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs6.10",
+                "MemorySize": 128,
+                "Timeout": 300
+            }
+        }
+    },
+    "Outputs": {
+    }
+}
