@@ -1,0 +1,41 @@
+{
+  "name": "bomber-create-database",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "",
+  "main": "src/index.js",
+  "scripts": {
+    "setup": "npm config set save-exact true && npm install --verbose",
+    "pack": "./node_modules/.bin/webpack",
+    "lint": "eslint src --ext .js",
+    "unit": "mocha --recursive test --compilers js:babel-register --require babel-polyfill --reporter spec",
+    "test": "npm run lint && npm run unit",
+    "package": "rm -rf artifact && mkdir artifact && webpack && node ./scripts/generate-artifact.js"
+  },
+  "devDependencies": {
+    "babel-core": "6.26.0",
+    "babel-loader": "7.1.2",
+    "babel-polyfill": "6.26.0",
+    "babel-preset-env": "1.6.0",
+    "eslint": "4.4.1",
+    "eslint-plugin-mocha": "4.11.0",
+    "mocha": "3.5.0",
+    "nock": "9.0.14",
+    "node-zip": "1.1.1",
+    "should": "11.2.1",
+    "should-sinon": "0.0.5",
+    "sinon": "3.2.1",
+    "sinon-chai": "2.13.0",
+    "webpack": "3.5.4",
+    "webpack-node-externals": "1.6.0"
+  },
+  "dependencies": {
+    "aws-sdk": "2.97.0",
+    "jsonschema": "1.2.0",
+    "node-fetch": "1.7.2",
+    "request": "2.81.0",
+    "request-promise": "4.2.1",
+    "uuid": "3.1.0"
+  }
+}
